@@ -28,8 +28,10 @@ public class CalendarMain {
         var output = visitor.visit(tree);
     }
 
-    public static void main(String[] args) throws Exception {
-        CharStream input = CharStreams.fromString("select new");
+    //in current change title "NEW"
+
+    static void main(String[] args) throws Exception {
+        CharStream input = CharStreams.fromString("select new\n");
         var prog = new CalendarMain(input);
         prog.setup();
         prog.run();

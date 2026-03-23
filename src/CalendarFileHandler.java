@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,12 +64,20 @@ public class CalendarFileHandler {
 
     public void newEmpty(){
         int index = getNewFileIndex();
+        var newData = new CalendarData(index);
         var path = CURR_DIR + File.separator + DIRECTORY + File.separator + index;
         File file = new File(path);
         try {
             if (file.createNewFile()) {
-                loadedEntry = index;
-                isLoaded = true;
+                try(ObjectOutputStream write = new ObjectOutputStream(new FileOutputStream(path)))
+                {
+                    write.writeObject(newData);
+                    loadedEntry = index;
+                    isLoaded = true;
+                }
+                catch (Exception e) {
+                    System.err.printf("Cannot save to file: %s\n", e);
+                }
             }
         }
         catch (Exception e) {

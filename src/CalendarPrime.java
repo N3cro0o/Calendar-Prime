@@ -11,8 +11,11 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Integer>{
     public Integer visitDef_change(CalendarParser.Def_changeContext ctx) {
         if (ctx.selected == null) return 1;
         selectedID = visit(ctx.selected);
-
-        return selectedID;
+        if (ctx.what.isEmpty()) return 2;
+        for (CalendarParser.ChangeContext change : ctx.what){
+            if (visit(change) != 0) {return 3;}
+        }
+        return 0;
     }
 
     @Override

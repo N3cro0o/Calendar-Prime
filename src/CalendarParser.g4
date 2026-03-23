@@ -28,7 +28,7 @@ change
     ;
 
 repeat
-    : INT       #repeat_num
+    : INT       #repeat_every_num
     | REPEAT_NONE_W         #repeat_none
     | REPEAT_DAILY_W        #repeat_day
     | REPEAT_WEEKLY_W       #repeat_week
