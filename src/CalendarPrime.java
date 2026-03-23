@@ -1,5 +1,6 @@
 public class CalendarPrime extends CalendarParserBaseVisitor<Integer>{
     CalendarFileHandler fileHandler;
+    private Integer selectedID = null;
 
     public CalendarPrime(CalendarFileHandler fh) {
         fileHandler = fh;
@@ -9,9 +10,9 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Integer>{
     @Override
     public Integer visitDef_change(CalendarParser.Def_changeContext ctx) {
         if (ctx.selected == null) return 1;
-        int selected = visit(ctx.selected);
+        selectedID = visit(ctx.selected);
 
-        return selected;
+        return selectedID;
     }
 
     @Override

@@ -28,10 +28,6 @@ public class CalendarMain {
         var output = visitor.visit(tree);
     }
 
-    public void newEmpty(){
-        fileHandler.newEmpty();
-    }
-
     public static void main(String[] args) throws Exception {
         CharStream input = CharStreams.fromString("select new");
         var prog = new CalendarMain(input);
