@@ -80,6 +80,12 @@ public class CalendarData implements Serializable {
         this.repeat = repeat;
     }
 
+    @Override
+    public String toString() {
+        return String.format("ID: %d, title: %s, description: %s, location: %s, start: %s, end: %s, all day: %b, repeat: %s",
+                ID, title, description, location, start, end, allDay, repeat);
+    }
+
     static class RepeatData implements Serializable {
         private RepeatCycle repeatCycle;
         private Integer repeatEvery;
@@ -149,6 +155,12 @@ public class CalendarData implements Serializable {
             INF,
             AFTER,
             ON
+        }
+
+        @Override
+        public String toString() {
+            return String.format("[cycle: %s, every: %d, end: %s, after: %s, on: %s]",
+                repeatCycle, repeatEvery, repeatEnd, repeatAfter, repeatOn);
         }
     }
 }

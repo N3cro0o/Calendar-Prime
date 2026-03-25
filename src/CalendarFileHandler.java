@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +14,7 @@ public class CalendarFileHandler {
     private List<Integer> entryList;
 
     public boolean isLoaded = false;
-    public Integer loadedEntry = null;
+    private CalendarData loadedEntry = null;
 
     public CalendarFileHandler(){
         CURR_DIR = System.getProperty("user.dir");
@@ -31,6 +29,10 @@ public class CalendarFileHandler {
     private boolean checkDir(){
         Path directory = Paths.get(CURR_DIR + File.separator + DIRECTORY);
         return Files.exists(directory);
+    }
+
+    public boolean checkForFile(int id) {
+        return entryList.contains(id);
     }
 
     private boolean createDir(){
@@ -62,7 +64,7 @@ public class CalendarFileHandler {
         return index;
     }
 
-    public void newEmpty(){
+    public Integer newEmpty(){
         int index = getNewFileIndex();
         var newData = new CalendarData(index);
         var path = CURR_DIR + File.separator + DIRECTORY + File.separator + index;
@@ -72,7 +74,7 @@ public class CalendarFileHandler {
                 try(ObjectOutputStream write = new ObjectOutputStream(new FileOutputStream(path)))
                 {
                     write.writeObject(newData);
-                    loadedEntry = index;
+                    loadedEntry = newData;
                     isLoaded = true;
                 }
                 catch (Exception e) {
@@ -82,10 +84,57 @@ public class CalendarFileHandler {
         }
         catch (Exception e) {
             System.err.printf("Cannot create file: %s\n", e);
+            return null;
         }
+        return index;
+    }
+
+    public void saveCurrent() {
+        var path = CURR_DIR + File.separator + DIRECTORY + File.separator + loadedEntry.ID;
+        try(ObjectOutputStream write = new ObjectOutputStream(new FileOutputStream(path)))
+        {
+            write.writeObject(loadedEntry);
+        }
+        catch (Exception e) {
+            System.err.printf("Cannot load to file: %s\n", e);
+        }
+    }
+
+    public String currentToString(){
+        return loadedEntry.toString();
     }
 
     public void deleteEntry(){
         isLoaded = false;
+    }
+
+    public void updateCurrentTitle(String t) {
+        loadedEntry.setTitle(t);
+    }
+
+    public void updateCurrentDesc(String d) {
+        loadedEntry.setDescription(d);
+    }
+
+    public void updateCurrentLocat(String l) {
+        loadedEntry.setDescription(l);
+    }
+
+    public CalendarData loadFile(int id) {
+        var path = CURR_DIR + File.separator + DIRECTORY + File.separator + id;
+        try(ObjectInputStream read = new ObjectInputStream(new FileInputStream(path)))
+        {
+            loadedEntry = (CalendarData) read.readObject();
+            isLoaded = true;
+        }
+        catch (Exception e) {
+            System.err.printf("Cannot load to file: %s\n", e);
+            return null;
+        }
+        return loadedEntry;
+    }
+
+    public Integer currentID() {
+        return loadedEntry.ID;
     }
 }

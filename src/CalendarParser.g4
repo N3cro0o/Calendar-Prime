@@ -3,13 +3,14 @@ options { tokenVocab=CalendarLexer; }
 
 prog_start : stat* ;
 
-stat : def EOL* ;
+stat : def (EOL | SEPARATOR)* ;
 
 def
     : SELECT_W selected = select    #def_select
     | LIST_W ALL_W      #def_list
     | DELETE_W to_del = file        #def_delete
     | IN_W selected = file CHANGE_W what += change (COMMA what += change)*     #def_change
+    | PRINT_W selected = file       #def_print
     ;
 
 select

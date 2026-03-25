@@ -24,6 +24,7 @@ REPEAT_WEEKLY_W : 'weekly' | 'w';
 REPEAT_MONTHLY_W : 'monthly' | 'm';
 REPEAT_YEARLY_W : 'yearly' | 'y';
 CURRENT_FILE_W : 'current' ;
+PRINT_W : 'print' ;
 
 END_AFTER_W : 'after';
 END_ON_W : 'on';
@@ -32,8 +33,9 @@ BOOL : 'true' | 'false' ;
 INT_TWO : INT_SINGLE INT_SINGLE ;
 INT_FOUR: INT_SINGLE INT_SINGLE INT_SINGLE INT_SINGLE ;
 INT : (INT_SINGLE+)  ;
-STR : '"' ([ -~])* '"' ;
+STR : '"' .*? '"' ;
 
+SEPARATOR : ';' ;
 COMMA : ',' ;
 EOL : '\n';
 WS: [ \t\r\f]+ -> skip ;

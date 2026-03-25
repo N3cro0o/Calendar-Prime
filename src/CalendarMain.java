@@ -31,7 +31,7 @@ public class CalendarMain {
     //in current change title "NEW"
 
     static void main(String[] args) throws Exception {
-        CharStream input = CharStreams.fromString("select new\n");
+        CharStream input = CharStreams.fromString("select from 3; print current; in current change title \"Nowy titel\", desc \"Nowy deskrypszyn\"; print 2; print current;");
         var prog = new CalendarMain(input);
         prog.setup();
         prog.run();
