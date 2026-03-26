@@ -1,5 +1,7 @@
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,7 +119,15 @@ public class CalendarFileHandler {
     }
 
     public void updateCurrentLocat(String l) {
-        loadedEntry.setDescription(l);
+        loadedEntry.setLocation(l);
+    }
+
+    public void updateCurrentStart(LocalDateTime start) {
+        loadedEntry.setStart(start);
+    }
+
+    public void updateCurrentEnd(LocalDateTime end) {
+        loadedEntry.setEnd(end);
     }
 
     public CalendarData loadFile(int id) {
@@ -136,5 +146,17 @@ public class CalendarFileHandler {
 
     public Integer currentID() {
         return loadedEntry.ID;
+    }
+
+    public void updateCurrentAllDay(boolean b) {
+        loadedEntry.setAllDay(b);
+    }
+
+    public CalendarData.RepeatData getCurrentRepeatData(){
+        return loadedEntry.getRepeat();
+    }
+
+    public void setCurrentRepeatData(CalendarData.RepeatData data){
+        loadedEntry.setRepeat(data);
     }
 }
