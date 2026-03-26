@@ -45,7 +45,7 @@ repeat_end
     ;
 
 file
-    : INT       #file_id
+    : (INT | INT_TWO | INT_FOUR)       #file_id
     | STR       #file_dir
     | CURRENT_FILE_W        #current
     ;
