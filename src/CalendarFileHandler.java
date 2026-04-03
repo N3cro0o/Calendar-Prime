@@ -67,7 +67,7 @@ public class CalendarFileHandler {
 
     public Long newEmpty(){
         long index = getNewFileIndex();
-        var newData = new CalendarData((int) index);
+        var newData = new CalendarData(index);
         var path = CURR_DIR + File.separator + DIRECTORY + File.separator + index;
         File file = new File(path);
         try {
@@ -157,5 +157,19 @@ public class CalendarFileHandler {
 
     public void setCurrentRepeatData(CalendarData.RepeatData data){
         loadedEntry.setRepeat(data);
+    }
+
+    public void pushWithoutDates(LocalDateTime from, LocalDateTime to) {
+        var repeat = loadedEntry.getRepeat();
+        repeat.pushWithoutPair(from, to);
+    }
+
+    public void pushWithoutDates(LocalDateTime date) {
+        pushWithoutDates(date, date);
+    }
+
+    public void resetWithoutDates(){
+        var repeat = loadedEntry.getRepeat();
+        repeat.resetWithoutArray();
     }
 }

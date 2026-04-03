@@ -133,7 +133,7 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
 
     @Override
     public Long visitAll_day(CalendarParser.All_dayContext ctx) {
-        Boolean b = Boolean.parseBoolean(ctx.check.getText());
+        boolean b = Boolean.parseBoolean(ctx.check.getText());
         fileHandler.updateCurrentAllDay(b);
         return 0L;
     }
@@ -216,6 +216,27 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
             }
         }
         return -2L;
+    }
+
+    @Override
+    public Long visitWithout_date(CalendarParser.Without_dateContext ctx) {
+        var date = visitToLocalDateTime(visit(ctx.date()));
+        fileHandler.pushWithoutDates(date);
+        return 0L;
+    }
+
+    @Override
+    public Long visitWithout_range(CalendarParser.Without_rangeContext ctx) {
+        var date_from = visitToLocalDateTime(visit(ctx.from));
+        var date_to = visitToLocalDateTime(visit(ctx.to));
+        fileHandler.pushWithoutDates(date_from, date_to);
+        return 0L;
+    }
+
+    @Override
+    public Long visitWithout_reset(CalendarParser.Without_resetContext ctx) {
+        fileHandler.resetWithoutDates();
+        return 0L;
     }
 
     @Override

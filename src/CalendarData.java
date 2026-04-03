@@ -1,5 +1,8 @@
+import org.antlr.v4.runtime.misc.Pair;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class CalendarData implements Serializable {
     public long ID;
@@ -13,7 +16,7 @@ public class CalendarData implements Serializable {
 
     //DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    public CalendarData(int id){
+    public CalendarData(long id){
         ID = id;
         title = "lorem ipsum";
         description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
@@ -92,6 +95,7 @@ public class CalendarData implements Serializable {
         private RepeatEnd repeatEnd;
         private Long repeatAfter;
         private LocalDateTime repeatOn;
+        private ArrayList<Pair<LocalDateTime, LocalDateTime>> withoutPairArray;
 
         public RepeatData() {
             repeatCycle = RepeatCycle.NONE;
@@ -99,6 +103,7 @@ public class CalendarData implements Serializable {
             repeatEnd = RepeatEnd.INF;
             repeatAfter = 0L;
             repeatOn = LocalDateTime.now();
+            withoutPairArray = new ArrayList<>();
         }
 
         public RepeatCycle getRepeatCycle() {
@@ -143,6 +148,28 @@ public class CalendarData implements Serializable {
             this.repeatOn = repeatOn;
         }
 
+        public ArrayList<Pair<LocalDateTime, LocalDateTime>> getWithoutArray() {
+            return withoutPairArray;
+        }
+
+        public void pushWithoutPair(LocalDateTime from, LocalDateTime to) {
+            this.withoutPairArray.add(new Pair<>(from, to));
+        }
+
+        public void resetWithoutArray() {
+            withoutPairArray.clear();
+        }
+
+        private String withoutToString() {
+            StringBuilder str = new StringBuilder("[");
+            for (Pair<LocalDateTime, LocalDateTime> pair : withoutPairArray) {
+                str.append(String.format("|from: %s to: %s|", pair.a, pair.b));
+            }
+            str.append("]");
+            return str.toString();
+        }
+
+
         enum RepeatCycle { // I miss Rust enums, they are so goated...
             NONE,
             DAILY,
@@ -159,8 +186,8 @@ public class CalendarData implements Serializable {
 
         @Override
         public String toString() {
-            return String.format("[cycle: %s, every: %d, end: %s, after: %s, on: %s]",
-                repeatCycle, repeatEvery, repeatEnd, repeatAfter, repeatOn);
+            return String.format("[cycle: %s, every: %d, end: %s, after: %s, on: %s, without: %s]",
+                repeatCycle, repeatEvery, repeatEnd, repeatAfter, repeatOn, withoutToString());
         }
     }
 }
