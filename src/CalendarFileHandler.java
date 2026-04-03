@@ -13,7 +13,7 @@ public class CalendarFileHandler {
     private final String CURR_DIR;
     private final String DIRECTORY = "data";
 
-    private List<Integer> entryList;
+    private List<Long> entryList;
 
     public boolean isLoaded = false;
     private CalendarData loadedEntry = null;
@@ -33,7 +33,7 @@ public class CalendarFileHandler {
         return Files.exists(directory);
     }
 
-    public boolean checkForFile(int id) {
+    public boolean checkForFile(long id) {
         return entryList.contains(id);
     }
 
@@ -51,14 +51,13 @@ public class CalendarFileHandler {
         if (files == null) return false;
         for(File f : files){
             if (f == null) return false;
-            System.out.println(f.getName());
-            entryList.add(Integer.parseInt(f.getName()));
+            entryList.add(Long.parseLong(f.getName()));
         }
         return true;
     }
 
-    private int getNewFileIndex(){
-        int index = 0;
+    private long getNewFileIndex(){
+        long index = 0;
         while (index < entryList.size()) {
             if (!entryList.contains(index)) { break; }
             index++;
@@ -66,9 +65,9 @@ public class CalendarFileHandler {
         return index;
     }
 
-    public Integer newEmpty(){
-        int index = getNewFileIndex();
-        var newData = new CalendarData(index);
+    public Long newEmpty(){
+        long index = getNewFileIndex();
+        var newData = new CalendarData((int) index);
         var path = CURR_DIR + File.separator + DIRECTORY + File.separator + index;
         File file = new File(path);
         try {
@@ -130,7 +129,7 @@ public class CalendarFileHandler {
         loadedEntry.setEnd(end);
     }
 
-    public CalendarData loadFile(int id) {
+    public CalendarData loadFile(long id) {
         var path = CURR_DIR + File.separator + DIRECTORY + File.separator + id;
         try(ObjectInputStream read = new ObjectInputStream(new FileInputStream(path)))
         {
@@ -144,7 +143,7 @@ public class CalendarFileHandler {
         return loadedEntry;
     }
 
-    public Integer currentID() {
+    public long currentID() {
         return loadedEntry.ID;
     }
 

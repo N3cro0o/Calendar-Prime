@@ -2,7 +2,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class CalendarData implements Serializable {
-    public int ID;
+    public long ID;
     private String title;
     private String description;
     private String location;
@@ -88,16 +88,16 @@ public class CalendarData implements Serializable {
 
     static class RepeatData implements Serializable {
         private RepeatCycle repeatCycle;
-        private Integer repeatEvery;
+        private Long repeatEvery;
         private RepeatEnd repeatEnd;
-        private Integer repeatAfter;
+        private Long repeatAfter;
         private LocalDateTime repeatOn;
 
         public RepeatData() {
             repeatCycle = RepeatCycle.NONE;
-            repeatEvery = 1;
+            repeatEvery = 1L;
             repeatEnd = RepeatEnd.INF;
-            repeatAfter = 0;
+            repeatAfter = 0L;
             repeatOn = LocalDateTime.now();
         }
 
@@ -109,11 +109,11 @@ public class CalendarData implements Serializable {
             this.repeatCycle = repeatCycle;
         }
 
-        public Integer getRepeatEvery() {
+        public Long getRepeatEvery() {
             return repeatEvery;
         }
 
-        public void setRepeatEvery(Integer repeatEvery) {
+        public void setRepeatEvery(Long repeatEvery) {
             if (repeatEvery > 0) {
                 this.repeatEvery = repeatEvery;
             }
@@ -127,11 +127,11 @@ public class CalendarData implements Serializable {
             this.repeatEnd = repeatEnd;
         }
 
-        public Integer getRepeatAfter() {
+        public Long getRepeatAfter() {
             return repeatAfter;
         }
 
-        public void setRepeatAfter(Integer repeatAfter) {
+        public void setRepeatAfter(Long repeatAfter) {
             this.repeatAfter = repeatAfter;
         }
 

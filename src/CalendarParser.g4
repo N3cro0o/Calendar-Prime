@@ -22,8 +22,8 @@ change
     : TITLE_W new = STR         #title
     | DESC_W new = STR          #desc
     | LOCAT_W new = STR         #locat
-    | START_W year = INT_FOUR month = INT_TWO day = INT_TWO hour = INT_TWO min = INT_TWO    #start
-    | END_W year = INT_FOUR month = INT_TWO day = INT_TWO hour = INT_TWO min = INT_TWO       #end
+    | START_W datetime    #start
+    | END_W datetime       #end
     | ALL_DAY_W check = BOOL        #all_day
     | REPEAT_W repeat           #repeat_event
     ;
@@ -36,12 +36,18 @@ repeat
     | REPEAT_MONTHLY_W
     | REPEAT_YEARLY_W)      #repeat_cycle
     | END_W repeat_end      #repeat_othr
+    | WITHOUT_W without     #repeat_without
+    ;
+
+without
+    : date    #without_date // Returns unix timestamp
+    | RANGE_W from = date RANGE_SEPARATOR to = date       #without_range
     ;
 
 repeat_end
     : INF_W     #inf_repeat
     | END_AFTER_W INT       #num_repeat
-    | END_ON_W year = INT_FOUR month = INT_TWO day = INT_TWO    #date_repeat
+    | END_ON_W date    #date_repeat
     ;
 
 file
@@ -49,3 +55,7 @@ file
     | STR       #file_dir
     | CURRENT_FILE_W        #current
     ;
+
+date : year = INT_FOUR month = INT_TWO day = INT_TWO ;
+
+datetime : year = INT_FOUR month = INT_TWO day = INT_TWO hour = INT_TWO min = INT_TWO ;

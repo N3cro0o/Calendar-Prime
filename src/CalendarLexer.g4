@@ -18,6 +18,8 @@ END_W : 'end';
 INF_W : 'inf' ;
 ALL_DAY_W : 'allDay';
 REPEAT_W : 'repeat';
+WITHOUT_W : 'without';
+RANGE_W : 'range' ;
 REPEAT_NONE_W : 'none';
 REPEAT_DAILY_W : 'daily' | 'd';
 REPEAT_WEEKLY_W : 'weekly' | 'w';
@@ -36,6 +38,7 @@ INT : (INT_SINGLE+)  ;
 STR : '"' .*? '"' ;
 
 SEPARATOR : ';' ;
+RANGE_SEPARATOR : '-' ;
 COMMA : ',' ;
 EOL : '\n';
 WS: [ \t\r\f]+ -> skip ;
