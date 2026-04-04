@@ -11,6 +11,7 @@ def
     | DELETE_W to_del = file        #def_delete
     | IN_W selected = file CHANGE_W what += change (COMMA what += change)*     #def_change
     | PRINT_W selected = file       #def_print
+    | EXPORT_W FROM_W what = file   #def_export
     ;
 
 select

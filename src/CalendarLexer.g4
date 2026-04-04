@@ -27,6 +27,8 @@ REPEAT_MONTHLY_W : 'monthly' | 'm';
 REPEAT_YEARLY_W : 'yearly' | 'y';
 CURRENT_FILE_W : 'current' ;
 PRINT_W : 'print' ;
+EXPORT_W : 'export' ;
+TO_W : 'to' ;
 
 END_AFTER_W : 'after';
 END_ON_W : 'on';

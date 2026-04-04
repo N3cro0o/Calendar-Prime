@@ -69,6 +69,16 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
     }
 
     @Override
+    public Long visitDef_export(CalendarParser.Def_exportContext ctx) {
+        if (ctx.what == null) return 1L;
+        selectedID = visit(ctx.what);
+        if (selectedID == null || selectedID < 0) return 1L;
+        fileHandler.loadFile(selectedID);
+        fileHandler.exportICS();
+        return 0L;
+    }
+
+    @Override
     public Long visitTitle(CalendarParser.TitleContext ctx) {
         if (ctx.STR() == null) return -1L;
         var title = ctx.STR().toString();

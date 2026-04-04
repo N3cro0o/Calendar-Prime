@@ -1,7 +1,10 @@
 import java.io.*;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.time.LocalDate;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +15,7 @@ public class CalendarFileHandler {
 
     private final String CURR_DIR;
     private final String DIRECTORY = "data";
+    private final String EXPORTS = "export";
 
     private List<Long> entryList;
 
@@ -21,15 +25,19 @@ public class CalendarFileHandler {
     public CalendarFileHandler(){
         CURR_DIR = System.getProperty("user.dir");
         entryList = new ArrayList<>();
-        var check = checkDir();
+        var check = checkDir(DIRECTORY);
         if (!check){
-            if (!createDir()) System.err.println("Cannot create 'data' directory");
+            if (!createDir(DIRECTORY)) System.err.println("Cannot create 'data' directory");
+        }
+        check = checkDir(EXPORTS);
+        if (!check){
+            if (!createDir(EXPORTS)) System.err.println("Cannot create 'export' directory");
         }
         var _ = loadEntries();
     }
 
-    private boolean checkDir(){
-        Path directory = Paths.get(CURR_DIR + File.separator + DIRECTORY);
+    private boolean checkDir(String dir){
+        Path directory = Paths.get(CURR_DIR + File.separator + dir);
         return Files.exists(directory);
     }
 
@@ -37,8 +45,8 @@ public class CalendarFileHandler {
         return entryList.contains(id);
     }
 
-    private boolean createDir(){
-        var path = CURR_DIR + File.separator + DIRECTORY;
+    private boolean createDir(String dir){
+        var path = CURR_DIR + File.separator + dir;
         File dirToMake = new File(path);
         return dirToMake.mkdir();
     }
@@ -171,5 +179,60 @@ public class CalendarFileHandler {
     public void resetWithoutDates(){
         var repeat = loadedEntry.getRepeat();
         repeat.resetWithoutArray();
+    }
+
+    public void exportICS() {
+        String fileName = String.format("%d-%s.ics", loadedEntry.ID, loadedEntry.getTitle());
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+            md.update(fileName.getBytes(StandardCharsets.UTF_8));
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+            return;
+        }
+            var path = CURR_DIR + File.separator + DIRECTORY + File.separator + fileName;
+        String icsBodyPreformatted = "BEGIN:VCALENDAR\n" +
+                "VERSION:2.0\n" +
+                "PRODID://PWR//CalendarPrime//EN\n" +
+                "CALSCALE:GREGORIAN\n" +
+                "METHOD:PUBLISH\n" +
+                "BEGIN:VEVENT\n" +
+                "UID:%s@pwr.edu.pl\n" +
+                "DTSTAMP:%s\n" +
+                "DTSTART:%s\n" +
+                "DTEND:%s\n" +
+                "SUMMARY:%s\n" +
+                "DESCRIPTION:%s\n" +
+                "LOCATION:%s\n" +
+                "END:VEVENT\nENDVCALENDAR";
+        // UID
+        byte[] digest = md.digest();
+        BigInteger bigInt = new BigInteger(1, digest);
+        StringBuilder hashText = new StringBuilder(bigInt.toString(16));
+        while (hashText.length() < 32) {
+            hashText.insert(0, "0");
+        }
+        // Dates
+        final DateTimeFormatter formatBig = DateTimeFormatter.ofPattern("yyyyMMdd");
+        final DateTimeFormatter formatSmol = DateTimeFormatter.ofPattern("HHmmss");
+        LocalDateTime date = LocalDateTime.now();
+        String createStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
+        date = loadedEntry.getStart();
+        String startStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
+        date = loadedEntry.getEnd();
+        String endStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
+        // Other goes down here
+        String icsBody = String.format(icsBodyPreformatted,
+                hashText, // UID
+                createStr, // Create
+                startStr, // Start
+                endStr, // End
+                loadedEntry.getTitle(), // Summary/title
+                loadedEntry.getDescription(), // Desc
+                loadedEntry.getLocation() // Locat
+                );
+        System.out.println(icsBody);
     }
 }
