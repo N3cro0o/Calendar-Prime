@@ -192,7 +192,7 @@ public class CalendarFileHandler {
             System.err.println(e.toString());
             return;
         }
-        var path = CURR_DIR + File.separator + DIRECTORY + File.separator + fileName;
+        var path = CURR_DIR + File.separator + EXPORTS + File.separator + fileName;
         String mainBody = "BEGIN:VCALENDAR\n" +
                 "VERSION:2.0\n" +
                 "PRODID://PWR//CalendarPrime//EN\n" +
@@ -262,6 +262,13 @@ public class CalendarFileHandler {
                 repeatBuilder
                 );
         String finalString = String.format(mainBody, icsEventBody);
+        try
+        {
+            Files.writeString(Path.of(path), finalString, StandardCharsets.UTF_8);
+        }
+        catch (Exception e) {
+            System.err.printf("Cannot export ics file to file: %s\n", e);
+        }
         System.out.println(finalString);
     }
 
