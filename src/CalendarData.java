@@ -14,8 +14,6 @@ public class CalendarData implements Serializable {
     private boolean allDay;
     private RepeatData repeat;
 
-    //DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
-
     public CalendarData(long id){
         ID = id;
         title = "lorem ipsum";
@@ -90,8 +88,17 @@ public class CalendarData implements Serializable {
     }
 
     static class RepeatData implements Serializable {
+        static final int MONDAY = 0b0000001;
+        static final int TUESDAY = 0b0000010;
+        static final int WEDNESDAY = 0b0000100;
+        static final int THURSDAY = 0b0001000;
+        static final int FRIDAY = 0b0010000;
+        static final int SATURDAY = 0b0100000;
+        static final int SUNDAY = 0b1000000;
+
         private RepeatCycle repeatCycle;
-        private Long repeatEvery;
+        private Long repeatEvery; // Interval IG too lazy to change name
+        private int weekday = 0b1111111;
         private RepeatEnd repeatEnd;
         private Long repeatAfter;
         private LocalDateTime repeatOn;
@@ -112,6 +119,15 @@ public class CalendarData implements Serializable {
 
         public void setRepeatCycle(RepeatCycle repeatCycle) {
             this.repeatCycle = repeatCycle;
+            this.weekday = 0b1111111;
+        }
+
+        public int getWeekdayMask() {
+            return this.weekday;
+        }
+
+        public void setWeekdayMask(int weekdayMask) {
+            this.weekday = weekdayMask;
         }
 
         public Long getRepeatEvery() {
@@ -186,8 +202,8 @@ public class CalendarData implements Serializable {
 
         @Override
         public String toString() {
-            return String.format("[cycle: %s, every: %d, end: %s, after: %s, on: %s, without: %s]",
-                repeatCycle, repeatEvery, repeatEnd, repeatAfter, repeatOn, withoutToString());
+            return String.format("[cycle: %s (%s), every: %d, end: %s, after: %s, on: %s, without: %s]",
+                repeatCycle, Integer.toBinaryString(weekday), repeatEvery, repeatEnd, repeatAfter, repeatOn, withoutToString());
         }
     }
 }

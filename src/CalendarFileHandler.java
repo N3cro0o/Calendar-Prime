@@ -192,21 +192,24 @@ public class CalendarFileHandler {
             System.err.println(e.toString());
             return;
         }
-            var path = CURR_DIR + File.separator + DIRECTORY + File.separator + fileName;
-        String icsBodyPreformatted = "BEGIN:VCALENDAR\n" +
+        var path = CURR_DIR + File.separator + DIRECTORY + File.separator + fileName;
+        String mainBody = "BEGIN:VCALENDAR\n" +
                 "VERSION:2.0\n" +
                 "PRODID://PWR//CalendarPrime//EN\n" +
                 "CALSCALE:GREGORIAN\n" +
                 "METHOD:PUBLISH\n" +
-                "BEGIN:VEVENT\n" +
+                "%s" + // Events go here
+                "ENDVCALENDAR";
+        String icsBodyPreformatted = "BEGIN:VEVENT\n" +
                 "UID:%s@pwr.edu.pl\n" +
-                "DTSTAMP:%s\n" +
-                "DTSTART:%s\n" +
-                "DTEND:%s\n" +
+                "DTSTAMP;TZID=Europe/Warsaw:%s\n" +
+                "DTSTART;TZID=Europe/Warsaw:%s\n" +
+                "DTEND;TZID=Europe/Warsaw:%s\n" +
                 "SUMMARY:%s\n" +
                 "DESCRIPTION:%s\n" +
                 "LOCATION:%s\n" +
-                "END:VEVENT\nENDVCALENDAR";
+                "%s" + // Extra stuff
+                "END:VEVENT\n";
         // UID
         byte[] digest = md.digest();
         BigInteger bigInt = new BigInteger(1, digest);
@@ -223,16 +226,68 @@ public class CalendarFileHandler {
         String startStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
         date = loadedEntry.getEnd();
         String endStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
-        // Other goes down here
-        String icsBody = String.format(icsBodyPreformatted,
+        // Repeats
+        StringBuilder repeatBuilder = new StringBuilder();
+        var repeatData = loadedEntry.getRepeat();
+        if (repeatData.getRepeatCycle() != CalendarData.RepeatData.RepeatCycle.NONE) {
+            repeatBuilder.append("RRULE:FREQ=").append(repeatData.getRepeatCycle());
+            int mask = repeatData.getWeekdayMask();
+            if (repeatData.getRepeatCycle() == CalendarData.RepeatData.RepeatCycle.WEEKLY && mask != 0b1111111) {
+                repeatBuilder.append(";BYDAY=");
+                List<String> days = getDays(mask);
+                for (int i = 0; i < days.size() - 1; i++) {
+                    repeatBuilder.append(String.format("%s,", days.get(i)));
+                }
+                repeatBuilder.append(String.format("%s", days.getLast()));
+            }
+            if (repeatData.getRepeatEvery() > 1) repeatBuilder.append(";INTERVAL=").append(repeatData.getRepeatEvery());
+            switch (repeatData.getRepeatEnd()) {
+                case AFTER -> repeatBuilder.append(";COUNT=").append(repeatData.getRepeatAfter());
+                case ON -> {
+                    date = repeatData.getRepeatOn();
+                    String untilStr = date.format(formatBig);
+                    repeatBuilder.append(";UNTIL=").append(untilStr);
+                }
+            }
+            repeatBuilder.append("\n");
+        }
+        String icsEventBody = String.format(icsBodyPreformatted,
                 hashText, // UID
                 createStr, // Create
                 startStr, // Start
                 endStr, // End
                 loadedEntry.getTitle(), // Summary/title
                 loadedEntry.getDescription(), // Desc
-                loadedEntry.getLocation() // Locat
+                loadedEntry.getLocation(), // Locat
+                repeatBuilder
                 );
-        System.out.println(icsBody);
+        String finalString = String.format(mainBody, icsEventBody);
+        System.out.println(finalString);
+    }
+
+    private static List<String> getDays(int mask) {
+        List<String> days = new ArrayList<>();
+        if ((mask & CalendarData.RepeatData.MONDAY) > 0) {
+            days.add("MO");
+        }
+        if ((mask & CalendarData.RepeatData.TUESDAY) > 0) {
+            days.add("TU");
+        }
+        if ((mask & CalendarData.RepeatData.WEDNESDAY) > 0) {
+            days.add("WE");
+        }
+        if ((mask & CalendarData.RepeatData.THURSDAY) > 0) {
+            days.add("TH");
+        }
+        if ((mask & CalendarData.RepeatData.FRIDAY) > 0) {
+            days.add("FR");
+        }
+        if ((mask & CalendarData.RepeatData.SATURDAY) > 0) {
+            days.add("SA");
+        }
+        if ((mask & CalendarData.RepeatData.SUNDAY) > 0) {
+            days.add("SU");
+        }
+        return days;
     }
 }

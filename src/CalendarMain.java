@@ -26,14 +26,15 @@ public class CalendarMain {
 
     public void run(){
         var output = visitor.visit(tree);
+        System.out.println(output);
     }
 
     //in current change title "NEW"
 
     static void main(String[] args) throws Exception {
-//        CharStream input = CharStreams.fromString("select from 1; print current; in current change title \"Titel\", desc \"Mozna wprowadzic nowe opisy\", end 2077 11 13 12 00, repeat 2, repeat without none; select from 0; print 1");
+//        CharStream input = CharStreams.fromString("select from 1; print current; in current change title \"Titel\", desc \"Mozna wprowadzic nowe opisy\", end 2077 11 13 12 00, repeat 2, repeat weekly (mo fr su), repeat end after 60; select from 0; print 1");
 //        CharStream input = CharStreams.fromString("select new");
-        CharStream input = CharStreams.fromString("export from 1 ");
+        CharStream input = CharStreams.fromString("print 1; export from 1;");
         var prog = new CalendarMain(input);
         prog.setup();
         prog.run();

@@ -30,7 +30,8 @@ change
     ;
 
 repeat
-    : INT       #repeat_every_num
+    : val = (INT | INT_TWO | INT_FOUR)       #repeat_every_num
+    | REPEAT_WEEKLY_W PAREN_OPEN (when += (MONDAY_W | TUESDAY_W | WEDNESDAY_W | THURSDAY_W | FRIDAY_W | SATURDAY_W | SUNDAY_W))+ PAREN_CLOSE    #repeat_cycle_week
     | cycle = (REPEAT_NONE_W
     | REPEAT_DAILY_W
     | REPEAT_WEEKLY_W
@@ -48,12 +49,12 @@ without
 
 repeat_end
     : INF_W     #inf_repeat
-    | END_AFTER_W INT       #num_repeat
+    | END_AFTER_W val = (INT | INT_TWO | INT_FOUR)       #num_repeat
     | END_ON_W date    #date_repeat
     ;
 
 file
-    : (INT | INT_TWO | INT_FOUR)       #file_id
+    : val = (INT | INT_TWO | INT_FOUR)       #file_id
     | STR       #file_dir
     | CURRENT_FILE_W        #current
     ;

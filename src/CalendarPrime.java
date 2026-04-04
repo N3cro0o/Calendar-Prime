@@ -30,6 +30,7 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
             }
             long o = visit(stat.def());
             if (o != 0) {
+                System.err.println(o);
                 result = -3;
                 break;
             }
@@ -162,6 +163,26 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
     }
 
     @Override
+    public Long visitRepeat_cycle_week(CalendarParser.Repeat_cycle_weekContext ctx) {
+        int mask = 0b00000000;
+        var repeat_data = fileHandler.getCurrentRepeatData();
+        for (Token weekday : ctx.when) {
+            switch (weekday.getType()) {
+                case CalendarLexer.MONDAY_W -> mask = mask ^ CalendarData.RepeatData.MONDAY;
+                case CalendarLexer.TUESDAY_W -> mask = mask ^ CalendarData.RepeatData.TUESDAY;
+                case CalendarLexer.WEDNESDAY_W -> mask = mask ^ CalendarData.RepeatData.WEDNESDAY;
+                case CalendarLexer.THURSDAY_W -> mask = mask ^ CalendarData.RepeatData.THURSDAY;
+                case CalendarLexer.FRIDAY_W -> mask = mask ^ CalendarData.RepeatData.FRIDAY;
+                case CalendarLexer.SATURDAY_W -> mask = mask ^ CalendarData.RepeatData.SATURDAY;
+                case CalendarLexer.SUNDAY_W -> mask = mask ^ CalendarData.RepeatData.SUNDAY;
+            }
+        }
+        repeat_data.setRepeatCycle(CalendarData.RepeatData.RepeatCycle.WEEKLY);
+        repeat_data.setWeekdayMask(mask);
+        return 0L;
+    }
+
+    @Override
     public Long visitRepeat_cycle(CalendarParser.Repeat_cycleContext ctx) {
         var repeat_data = fileHandler.getCurrentRepeatData();
         switch (ctx.cycle.getType()) {
@@ -199,7 +220,7 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
     @Override
     public Long visitNum_repeat(CalendarParser.Num_repeatContext ctx) {
         var repeat_data = fileHandler.getCurrentRepeatData();
-        long i = Long.parseLong(ctx.INT().getText());
+        long i = Long.parseLong(ctx.val.getText());
         repeat_data.setRepeatEnd(CalendarData.RepeatData.RepeatEnd.AFTER);
         repeat_data.setRepeatAfter(i);
         return 0L;
