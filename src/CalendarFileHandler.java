@@ -67,6 +67,18 @@ public class CalendarFileHandler {
         return true;
     }
 
+    public String listAllEntries(){
+        StringBuilder output = new StringBuilder();
+        for (long id : entryList) {
+            loadFile(id);
+            output.append(id);
+            output.append(' ');
+            output.append(loadedEntry.getTitle());
+            output.append('\n');
+        }
+        return output.toString();
+    }
+
     private long getNewFileIndex(){
         long index = 0;
         while (index < entryList.size()) {
@@ -110,14 +122,21 @@ public class CalendarFileHandler {
         catch (Exception e) {
             System.err.printf("Cannot load to file: %s\n", e);
         }
+        System.out.println("Reload all entries");
+        var _ = loadEntries();
     }
 
     public String currentToString(){
         return loadedEntry.toString();
     }
 
-    public void deleteEntry(){
+    public long deleteEntry(long id){
+        var path = CURR_DIR + File.separator + DIRECTORY + File.separator + id;
+        if (!checkForFile(id)) return 1;
+        File fileToDel = new File(path);
+        if (!fileToDel.delete()) return 2;
         isLoaded = false;
+        return 0;
     }
 
     public void updateCurrentTitle(String t) {

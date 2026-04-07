@@ -70,6 +70,18 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
     }
 
     @Override
+    public Long visitDef_list(CalendarParser.Def_listContext ctx) {
+        System.out.println(fileHandler.listAllEntries());
+        return 0L;
+    }
+
+    @Override
+    public Long visitDef_delete(CalendarParser.Def_deleteContext ctx) {
+        fileHandler.deleteEntry(visit(ctx.to_del));
+        return 0L;
+    }
+
+    @Override
     public Long visitDef_export(CalendarParser.Def_exportContext ctx) {
         if (ctx.what == null) return 1L;
         selectedID = visit(ctx.what);
@@ -206,6 +218,11 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
     }
 
     @Override
+    public Long visitRepeat_without(CalendarParser.Repeat_withoutContext ctx) {
+        return visit(ctx.without());
+    }
+
+    @Override
     public Long visitRepeat_othr(CalendarParser.Repeat_othrContext ctx) {
         return visit(ctx.repeat_end());
     }
@@ -263,6 +280,7 @@ public class CalendarPrime extends CalendarParserBaseVisitor<Long>{
         fileHandler.pushWithoutDates(date_from, date_to);
         return 0L;
     }
+
 
     @Override
     public Long visitWithout_reset(CalendarParser.Without_resetContext ctx) {
