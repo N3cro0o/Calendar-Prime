@@ -42,8 +42,8 @@ repeat
     ;
 
 without
-    : date    #without_date // Returns unix timestamp
-    | RANGE_W from = date RANGE_SEPARATOR to = date       #without_range
+    : RANGE_W from = date RANGE_SEPARATOR to = date       #without_range
+    | date    #without_date // Returns unix timestamp
     | REPEAT_NONE_W        #without_reset
     ;
 

@@ -1,8 +1,11 @@
+import org.antlr.v4.runtime.misc.Pair;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.MessageDigest;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -183,15 +186,8 @@ public class CalendarFileHandler {
 
     public void exportICS() {
         String fileName = String.format("%d-%s.ics", loadedEntry.ID, loadedEntry.getTitle());
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("MD5");
-            md.update(fileName.getBytes(StandardCharsets.UTF_8));
-        }
-        catch (Exception e) {
-            System.err.println(e.toString());
-            return;
-        }
+        List<String> eventList = new ArrayList<>();
+        String finalString;
         var path = CURR_DIR + File.separator + EXPORTS + File.separator + fileName;
         String mainBody = "BEGIN:VCALENDAR\n" +
                 "VERSION:2.0\n" +
@@ -200,6 +196,100 @@ public class CalendarFileHandler {
                 "METHOD:PUBLISH\n" +
                 "%s" + // Events go here
                 "ENDVCALENDAR";
+        Duration endOffset = Duration.between(loadedEntry.getStart(), loadedEntry.getEnd());
+        // TODO
+        // Calculate periods of time
+        var repeatData = loadedEntry.getRepeat();
+        if (!repeatData.getWithoutArray().isEmpty()) {
+            LocalDateTime finalDate = null;
+            switch (repeatData.getRepeatEnd()) {
+                case INF -> finalDate = LocalDateTime.MAX;
+                case ON -> finalDate = repeatData.getRepeatOn();
+                case AFTER -> {
+                    switch (repeatData.getRepeatCycle()) {
+                        case DAILY -> finalDate = loadedEntry.getStart().plusDays(repeatData.getRepeatAfter());
+                        case WEEKLY -> finalDate = loadedEntry.getStart().plusWeeks(repeatData.getRepeatAfter());
+                        case MONTHLY -> finalDate = loadedEntry.getStart().plusMonths(repeatData.getRepeatAfter());
+                        case YEARLY -> finalDate = loadedEntry.getStart().plusYears(repeatData.getRepeatAfter());
+                    }
+                }
+            }
+            var localStartDate = loadedEntry.getStart();
+            var startDate = loadedEntry.getStart();
+            var nonoDates = repeatData.getWithoutArray();
+            boolean nonoCheck = false;
+            // Event loop
+            while (localStartDate.isBefore(finalDate)) {
+                if (!nonoCheck) {
+                    for (Pair<LocalDateTime, LocalDateTime> str : nonoDates) {
+                        if (str.a.isBefore(localStartDate) && str.b.isAfter(localStartDate)) {
+                            nonoCheck = true;
+                            CalendarData.RepeatData newData = new CalendarData.RepeatData();
+                            newData.setWeekdayMask(repeatData.getWeekdayMask());
+                            newData.setRepeatCycle(repeatData.getRepeatCycle());
+                            newData.setRepeatEnd(CalendarData.RepeatData.RepeatEnd.ON);
+                            newData.setRepeatEvery(repeatData.getRepeatEvery());
+                            newData.setRepeatOn(str.a);
+                            eventList.add(generateEventBody(fileName, startDate, endOffset, newData));
+                            break;
+                        }
+                    }
+                }
+                else {
+                    boolean exitCheck = true;
+                    for (Pair<LocalDateTime, LocalDateTime> str : nonoDates) {
+                        if (str.a.isBefore(localStartDate) && str.b.isAfter(localStartDate)) {
+                            exitCheck = false;
+                            break;
+                        }
+                    }
+                    if (exitCheck) {
+                        nonoCheck = false;
+                        startDate = localStartDate;
+                    }
+                }
+                switch (repeatData.getRepeatCycle()) {
+                    case DAILY -> localStartDate = localStartDate.plusDays(repeatData.getRepeatEvery());
+                    case WEEKLY -> localStartDate = localStartDate.plusWeeks(repeatData.getRepeatEvery());
+                    case MONTHLY -> localStartDate = localStartDate.plusMonths(repeatData.getRepeatEvery());
+                    case YEARLY -> localStartDate = localStartDate.plusYears(repeatData.getRepeatEvery());
+                }
+            }
+            CalendarData.RepeatData newData = new CalendarData.RepeatData();
+            newData.setWeekdayMask(repeatData.getWeekdayMask());
+            newData.setRepeatCycle(repeatData.getRepeatCycle());
+            newData.setRepeatEnd(CalendarData.RepeatData.RepeatEnd.ON);
+            newData.setRepeatEvery(repeatData.getRepeatEvery());
+            newData.setRepeatOn(finalDate);
+            eventList.add(generateEventBody(fileName, startDate, endOffset, newData));
+            StringBuilder eventString = new StringBuilder();
+            for (String str : eventList) eventString.append(str);
+            finalString = String.format(mainBody, eventString);
+        }
+        else {
+            var icsEventBody = generateEventBody(fileName, loadedEntry.getStart(), endOffset, loadedEntry.getRepeat());
+            finalString = String.format(mainBody, icsEventBody);
+        }
+        try
+        {
+            Files.writeString(Path.of(path), finalString, StandardCharsets.UTF_8);
+        }
+        catch (Exception e) {
+            System.err.printf("Cannot export ics file to file: %s\n", e);
+        }
+        System.out.println(finalString);
+    }
+
+    private String generateEventBody(String fileName, LocalDateTime start, Duration endOffset, CalendarData.RepeatData repeatData) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+            md.update(fileName.getBytes(StandardCharsets.UTF_8));
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+            return "";
+        }
         String icsBodyPreformatted = "BEGIN:VEVENT\n" +
                 "UID:%s@pwr.edu.pl\n" +
                 "DTSTAMP;TZID=Europe/Warsaw:%s\n" +
@@ -222,13 +312,12 @@ public class CalendarFileHandler {
         final DateTimeFormatter formatSmol = DateTimeFormatter.ofPattern("HHmmss");
         LocalDateTime date = LocalDateTime.now();
         String createStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
-        date = loadedEntry.getStart();
+        date = start;
         String startStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
-        date = loadedEntry.getEnd();
+        date = date.plusSeconds(endOffset.getSeconds());
         String endStr = String.format("%sT%sZ", date.format(formatBig), date.format(formatSmol));
         // Repeats
         StringBuilder repeatBuilder = new StringBuilder();
-        var repeatData = loadedEntry.getRepeat();
         if (repeatData.getRepeatCycle() != CalendarData.RepeatData.RepeatCycle.NONE) {
             repeatBuilder.append("RRULE:FREQ=").append(repeatData.getRepeatCycle());
             int mask = repeatData.getWeekdayMask();
@@ -251,7 +340,7 @@ public class CalendarFileHandler {
             }
             repeatBuilder.append("\n");
         }
-        String icsEventBody = String.format(icsBodyPreformatted,
+        return String.format(icsBodyPreformatted,
                 hashText, // UID
                 createStr, // Create
                 startStr, // Start
@@ -260,16 +349,7 @@ public class CalendarFileHandler {
                 loadedEntry.getDescription(), // Desc
                 loadedEntry.getLocation(), // Locat
                 repeatBuilder
-                );
-        String finalString = String.format(mainBody, icsEventBody);
-        try
-        {
-            Files.writeString(Path.of(path), finalString, StandardCharsets.UTF_8);
-        }
-        catch (Exception e) {
-            System.err.printf("Cannot export ics file to file: %s\n", e);
-        }
-        System.out.println(finalString);
+        );
     }
 
     private static List<String> getDays(int mask) {
