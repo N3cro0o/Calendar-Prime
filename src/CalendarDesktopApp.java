@@ -32,8 +32,8 @@ public class CalendarDesktopApp extends JFrame {
 
         // Przykładowy skrypt testujący gramatykę
         inputCodeArea.setText("select new;\n" +
-                "in current change \n" +
-                "    title \"Spotkanie Zespolu\",\n" +
+                "in current change" +
+                " title \"Spotkanie Zespolu\",\n" +
                 "    description \"Wazne omowienie projektu\",\n" +
                 "    location \"Sala konferencyjna\",\n" +
                 "    start 2026 04 20 10 00,\n" +
@@ -48,9 +48,11 @@ public class CalendarDesktopApp extends JFrame {
 
         JButton executeBtn = new JButton("Uruchom skrypt (Execute)");
         executeBtn.setFont(new Font("Arial", Font.BOLD, 14));
-        executeBtn.setBackground(new Color(46, 204, 113));
-        executeBtn.setForeground(Color.WHITE);
+        executeBtn.setBackground(new Color(54, 219, 0));
+        executeBtn.setOpaque(true);
+        executeBtn.setBorderPainted(false);
         executeBtn.setFocusPainted(false);
+
         executeBtn.addActionListener(e -> executeAntlrGrammar());
         leftPanel.add(executeBtn, BorderLayout.SOUTH);
 
