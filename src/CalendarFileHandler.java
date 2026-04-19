@@ -210,11 +210,11 @@ public class CalendarFileHandler {
         var path = CURR_DIR + File.separator + EXPORTS + File.separator + fileName;
         String mainBody = "BEGIN:VCALENDAR\n" +
                 "VERSION:2.0\n" +
-                "PRODID://PWR//CalendarPrime//EN\n" +
+                "PRODID:-//PWR//CalendarPrime//EN\n" +
                 "CALSCALE:GREGORIAN\n" +
                 "METHOD:PUBLISH\n" +
                 "%s" + // Events go here
-                "ENDVCALENDAR";
+                "END:VCALENDAR\n";
         Duration endOffset = Duration.between(loadedEntry.getStart(), loadedEntry.getEnd());
         // TODO
         // Calculate periods of time
